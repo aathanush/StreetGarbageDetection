@@ -5,43 +5,27 @@ Created on Mon Jan 17 09:33:22 2022
 @author: sutha
 """
 #Importing the libraries
-from keras.models import Sequential
-from keras.layers import Convolution2D
-from keras.layers import MaxPooling2D
-from keras.layers import Flatten
-from keras.layers import Dense
+import tensorflow as tf
+
+
 
 # Building of CNN
 
 #Initialising the CNN
-classifier = Sequential()
-
 #step 1 - Convolution - (check)
-classifier.add(Convolution2D(32,3,3,input_shape=(64,64,3),activation='relu'))
-
 #Step 2 - pooling
-classifier.add(MaxPooling2D(pool_size=(2,2)))
-
 #Step 3 - flattening
-classifier.add(Flatten())
-
 #Step 4 - Full connection
-classifier.add(Dense(units=148,activation='relu'))
-classifier.add(Dense(units=5,activation='softmax'))
-
+model = tf.keras.models.Sequential([ tf.keras.layers.Conv2D(32, (3,3),padding='same', activation='relu', input_shape=(128,128,3)),tf.keras.layers.MaxPooling2D((3,3)),tf.keras.layers.Conv2D(64, (3,3),padding='same', activation='relu', input_shape=(128,128,3)),tf.keras.layers.MaxPooling2D((3,3)), tf.keras.layers.Conv2D(128, (3,3),padding='same', activation='relu', input_shape=(128,128,3)),tf.keras.layers.MaxPooling2D((3,3)), tf.keras.layers.Conv2D(256, (3,3),padding='same', activation='relu', input_shape=(128,128,3)),tf.keras.layers.MaxPooling2D((3,3)), tf.keras.layers.Flatten(),tf.keras.layers.Dense(512, activation='relu'),tf.keras.layers.Dense(6, activation='softmax')])
 #Compiling the CNN
-classifier.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adam',metrics=['accuracy'],run_eagerly=True)
+
+
+#Creating the train and test data
+train=tf.keras.utils.image_dataset_from_directory( '/content/drive/MyDrive/Garbage classification/train',labels="inferred",label_mode="categorical",class_names=["cardboard","glass","metal","paper","plastic","trash"],color_mode="rgb",batch_size=32,image_size=(128, 128),)
+test=tf.keras.utils.image_dataset_from_directory( '/content/drive/MyDrive/Garbage classification/test',labels="inferred",label_mode="categorical",class_names=["cardboard","glass","metal","paper","plastic","trash"],color_mode="rgb",batch_size=32,image_size=(128, 128),)
 
 #Fitting the CNN to the images
-from keras.preprocessing.image import ImageDataGenerator
+model.fit(train,epochs=25,validation_data=test,batch_size=50)
 
-train_datagen = ImageDataGenerator(rescale=1./255,shear_range=0.2,zoom_range=0.2,horizontal_flip=True)
-
-test_datagen = ImageDataGenerator(rescale=1./255)
-
-train_generator = train_datagen.flow_from_directory('Garbage classification/train',target_size=(64, 64),batch_size=32,class_mode='categorical')
-
-test_generator = test_datagen.flow_from_directory('Garbage classification/test',target_size=(64, 64),batch_size=32,class_mode='categorical')
-
-classifier.fit(train_generator,steps_per_epoch=2023,epochs=30,validation_data=test_generator,validation_steps=504)
-
+print(model.summary())
