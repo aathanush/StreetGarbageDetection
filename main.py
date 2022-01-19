@@ -6,7 +6,7 @@ Created on Mon Jan 17 09:33:22 2022
 """
 #Importing the libraries
 import tensorflow as tf
-
+import numpy as np
 
 
 # Building of CNN
@@ -29,3 +29,24 @@ test=tf.keras.utils.image_dataset_from_directory( '/content/drive/MyDrive/Garbag
 model.fit(train,epochs=25,validation_data=test,batch_size=50)
 
 print(model.summary())
+
+#Prediction
+classes=["cardboard","glass","metal","paper","plastic","trash"]
+image_path=input("Enter the path of the image that you wish to classify")
+image = tf.keras.preprocessing.image.load_img(image_path,target_size=(128,128))
+img = tf.keras.preprocessing.image.img_to_array(image)
+img = np.expand_dims(img, axis=0)
+image = np.vstack([img])
+
+t=model.predict(image)
+t=list(t[0])
+print("The predctions in decreasing order of probability are:")
+a=classes.pop(t.index(max(t)))
+t.pop(t.index(max(t)))
+b=classes.pop(t.index(max(t)))
+t.pop(t.index(max(t)))
+c=classes.pop(t.index(max(t)))
+t.pop(t.index(max(t)))
+d=classes.pop(t.index(max(t)))
+t.pop(t.index(max(t)))
+print(f"{a}\n{b}\n{c}\n{d}\n")
